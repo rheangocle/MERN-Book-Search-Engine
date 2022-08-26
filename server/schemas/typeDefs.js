@@ -1,33 +1,45 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
-  type Profile {
+  type User {
     _id: ID
-    name: String
-    email: String
-    password: String
-    skills: [String]!
+    username: String!
+    email: String!
+    password: String!
+    savedBooks: [String]
+  }
+
+  type Book {
+    _id: ID
+    authors: [String]
+    description: String!
+    bookId: String!
+    image: String
+    link: String
+    title: String!
   }
 
   type Auth {
     token: ID!
-    profile: Profile
+    user: User
   }
 
   type Query {
-    profiles: [Profile]!
-    profile(profileId: ID!): Profile
+    users: [User]!
+    user(UserId: ID!): User
     # Because we have the context functionality in place to check a JWT and decode its data, we can use a query that will always find and return the logged in user's data
     me: Profile
   }
 
   type Mutation {
-    addProfile(name: String!, email: String!, password: String!): Auth
+    addUser(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
 
-    addSkill(profileId: ID!, skill: String!): Profile
-    removeProfile: Profile
-    removeSkill(skill: String!): Profile
+    #saveBook: Accepts a book author's array, description, title, bookId, image, and link as parameters; returns a User type. (Look into creating what's known as an input type to handle all of these parameters!)
+
+    addBook(userId: ID!, book: ID!): User
+    removeUser: User
+    removeBook(book: ID!): User
   }
 `;
 
