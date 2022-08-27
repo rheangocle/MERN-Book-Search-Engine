@@ -27,15 +27,15 @@ const resolvers = {
   },
 
   Mutation: {
-    addUser: async (parent, { username, email, password }) => {
-      const user = await User.create({ username, email, password });
+    addUser: async (parent, args) => {
+      const user = await User.create(args);
       const token = signToken(user);
 
       return { token, user };
     },
     login: async (parent, { username, email, password }) => {
       const user = await User.findOne({
-        $or: [{ username: body.username }, { email: body.email }],
+        $or: [{ username }, { email }],
       });
 
       if (!user) {
@@ -53,13 +53,13 @@ const resolvers = {
     },
 
     // Add a third argument to the resolver to access data in our `context`
-    addBook: async (parent, { user, book }, context) => {
+    saveBook: async (parent, { user, book }, context) => {
       // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
         return User.findOneAndUpdate(
-          { _id: user._Id },
+          { _id: user._id },
           {
-            $addToSet: { savedBooks: book },
+            $addToSet: { savedBooks: [book] },
           },
           {
             new: true,
@@ -70,19 +70,13 @@ const resolvers = {
       // If user attempts to execute this mutation and isn't logged in, throw an error
       throw new AuthenticationError("You need to be logged in!");
     },
-    // Set up mutation so a logged in user can only remove their profile and no one else's
-    removeProfile: async (parent, args, context) => {
-      if (context.user) {
-        return Profile.findOneAndDelete({ _id: context.user._id });
-      }
-      throw new AuthenticationError("You need to be logged in!");
-    },
+
     // Make it so a logged in user can only remove a skill from their own profile
-    removeBook: async (parent, { user, book }, context) => {
+    deleteBook: async (parent, { user, book }, context) => {
       if (context.user) {
         return User.findOneAndUpdate(
           { _id: user._id },
-          { $pull: { savedBooks: { bookId: params.bookId } } },
+          { $pull: { savedBooks: { bookId: book._id } } },
           { new: true }
         );
       }
