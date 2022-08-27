@@ -25,10 +25,11 @@ const typeDefs = gql`
   }
 
   type Query {
-    users: [User]
-    user(UserId: ID!): User
+    #user(UserId: ID!): User
+    
     # Because we have the context functionality in place to check a JWT and decode its data, we can use a query that will always find and return the logged in user's data
-    me: Profile
+
+    me: User
   }
 
   type Mutation {
@@ -46,7 +47,8 @@ const typeDefs = gql`
 
     #saveBook: Accepts a book author's array, description, title, bookId, image, and link as parameters; returns a User type. (Look into creating what's known as an input type to handle all of these parameters!)
 
-    removeBook(savedBooks: [ID]!): User
+    removeBook(bookId: ID!): User
+    #removeBook(savedBooks: [ID]!): User
   }
 `;
 

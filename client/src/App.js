@@ -45,10 +45,8 @@ function App() {
         <>
           <Navbar />
           <Routes>
-            <Route path='/' element={<Home />} />
             <Route path='/login' element={<LoginForm />} />
             <Route path='/signup' element={<SignupForm />} />
-            <Route path='/me' element={<Profile />} />
             <Route path='/' element={<Home />} />
             <Route path='/' element={<SearchBooks />} />
             <Route path='/saved' element={<SavedBooks />} />
