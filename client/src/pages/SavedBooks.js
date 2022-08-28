@@ -15,8 +15,8 @@ import { REMOVE_BOOK } from "../utils/mutations";
 
 const SavedBooks = () => {
   const { loading, data } = useQuery(QUERY_ME);
-  const (deleteBook, {error}) = useMutation(REMOVE_BOOK);
-  const userData = data?.me || {};
+  const [deleteBook] = useMutation(REMOVE_BOOK);
+  const userData = data?.me || [];
   // const [userData, setUserData] = useState({});
 
   // use this to determine if `useEffect()` hook needs to run again
@@ -56,8 +56,8 @@ const SavedBooks = () => {
     }
 
     try {
-      const { data } = await deleteBook({
-        variables: {bookId}
+      await deleteBook({
+        variables: { bookId },
       });
 
       // const response = await deleteBook(bookId, token);

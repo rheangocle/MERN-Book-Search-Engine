@@ -1,6 +1,6 @@
 const { AuthenticationError } = require("apollo-server-express");
 // import user model
-const { User } = require("../models");
+const { User, Book } = require("../models");
 const { signToken } = require("../utils/auth");
 
 const resolvers = {
@@ -14,27 +14,23 @@ const resolvers = {
     // By adding context to our query, we can retrieve the logged in user without specifically searching for them
     me: async (parent, args, context) => {
       if (context.user) {
-        const userData = await User.findOne({ _id: context.user._id });
-        return userData;
+        return User.findOne({ _id: context.user._id }).populate("savedBooks");
       }
       throw new AuthenticationError("You need to be logged in!");
     },
   },
 
   Mutation: {
-    createUser: async (parent, args) => {
-      const user = await User.create(args);
+    createUser: async (parent, { username, email, password }) => {
+      const user = await User.create({ username, email, password });
       const token = signToken(user);
-
       return { token, user };
     },
-    login: async (parent, { username, email, password }) => {
-      const user = await User.findOne({
-        $or: [{ username }, { email }],
-      });
+    login: async (parent, { email, password }) => {
+      const user = await User.findOne({ email });
 
       if (!user) {
-        throw new AuthenticationError("Can't find this user");
+        throw new AuthenticationError("No user found with this email address");
       }
 
       const correctPw = await user.isCorrectPassword(password);
@@ -51,10 +47,10 @@ const resolvers = {
     saveBook: async (parent, { book }, context) => {
       // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
-        const updatedUser = User.findOneAndUpdate(
+        const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
           {
-            $addToSet: { savedBooks: [book] },
+            $addToSet: { savedBooks: book._id },
           },
           {
             new: true,
@@ -68,11 +64,11 @@ const resolvers = {
     },
 
     // Make it so a logged in user can only remove a skill from their own profile
-    deleteBook: async (parent, { bookId }, context) => {
+    deleteBook: async (parent, { book }, context) => {
       if (context.user) {
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $pull: { savedBooks: { bookId } } },
+          { $pull: { savedBooks: book._id } },
           { new: true }
         );
         return updatedUser;

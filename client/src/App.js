@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SearchBooks from "./pages/SearchBooks";
 import SavedBooks from "./pages/SavedBooks";
 import Navbar from "./components/Navbar";
-
 import {
   ApolloClient,
   InMemoryCache,
@@ -12,9 +11,6 @@ import {
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 
-//Import route paths from pages
-import LoginForm from "./components/LoginForm";
-import SignupForm from "./components/SignupForm";
 // Construct our main GraphQL API endpoint
 const httpLink = createHttpLink({
   uri: "/graphql",
@@ -45,9 +41,6 @@ function App() {
         <>
           <Navbar />
           <Routes>
-            <Route path='/login' element={<LoginForm />} />
-            <Route path='/signup' element={<SignupForm />} />
-            <Route path='/' element={<Home />} />
             <Route path='/' element={<SearchBooks />} />
             <Route path='/saved' element={<SavedBooks />} />
             <Route
