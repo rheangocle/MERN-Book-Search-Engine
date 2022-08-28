@@ -5,19 +5,17 @@ const { signToken } = require("../utils/auth");
 
 const resolvers = {
   Query: {
-    user: async (parent, { _id, username }) => {
-      const foundUser = User.findOne({
-        $or: [
-          { _id},
-          { username},
-        ],
-      });
-      return foundUser;
-    },
+    // user: async (parent, { _id, username }, context) => {
+    //   const foundUser = await User.findOne({
+    //     $or: [{ _id: context.user._id }, { username: context.user.username }],
+    //   });
+    //   return foundUser;
+    // },
     // By adding context to our query, we can retrieve the logged in user without specifically searching for them
     me: async (parent, args, context) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id });
+        const userData = await User.findOne({ _id: context.user._id });
+        return userData;
       }
       throw new AuthenticationError("You need to be logged in!");
     },
@@ -50,7 +48,7 @@ const resolvers = {
     },
 
     // Add a third argument to the resolver to access data in our `context`
-    saveBook: async (parent, { user, book }, context) => {
+    saveBook: async (parent, { book }, context) => {
       // If context has a `user` property, that means the user executing this mutation has a valid JWT and is logged in
       if (context.user) {
         const updatedUser = User.findOneAndUpdate(
@@ -70,13 +68,13 @@ const resolvers = {
     },
 
     // Make it so a logged in user can only remove a skill from their own profile
-    deleteBook: async (parent, { user, book }, context) => {
+    deleteBook: async (parent, { bookId }, context) => {
       if (context.user) {
         const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $pull: { savedBooks: { bookId} } },
+          { $pull: { savedBooks: { bookId } } },
           { new: true }
-        )
+        );
         return updatedUser;
       }
       throw new AuthenticationError("You need to be logged in!");
