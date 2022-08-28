@@ -9,6 +9,7 @@ const db = require("./config/connection");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+let apolloServer = null;
 async function startServer() {
   apolloServer = new ApolloServer({
     typeDefs,
@@ -44,3 +45,5 @@ db.once("open", () => {
 db.on("error", (err) => {
   console.error("MongoDB connection error: ", err);
 });
+
+//allow all button
